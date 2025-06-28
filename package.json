@@ -9,15 +9,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.4.21",
     "bootstrap": "^5.3.3",
-    "bootstrap-icons": "^1.11.3"
+    "bootstrap-icons": "^1.11.3",
+    "vue": "^3.4.21",
+    "vue-i18n": "^9.14.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
     "vite": "^5.2.0"
   },
-  "keywords": ["vue", "bootstrap", "greek history", "mobile-friendly"],
+  "keywords": [
+    "vue",
+    "bootstrap",
+    "greek history",
+    "mobile-friendly"
+  ],
   "author": "Your Name",
   "license": "MIT"
 }

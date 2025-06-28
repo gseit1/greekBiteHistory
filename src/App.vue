@@ -1,27 +1,42 @@
 <template>
   <div id="app">
+    <!-- Language Switcher - Top Right Corner -->
+    <div class="language-switcher-fixed">
+      <button 
+        @click="switchLanguage('en')"
+        :class="['lang-btn', { active: currentLocale === 'en' }]"
+      >
+        🇺🇸 EN
+      </button>
+      <button 
+        @click="switchLanguage('el')"
+        :class="['lang-btn', { active: currentLocale === 'el' }]"
+      >
+        🇬🇷 EL
+      </button>
+    </div>
+
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="container">
         <div class="row">
           <div class="col-lg-8 mx-auto text-center hero-content">
-            <h1 class="hero-title">🏛️ Mini Greek History Bites</h1>
+            <h1 class="hero-title">🏛️ {{ $t('hero.title') }}</h1>
             <p class="hero-subtitle">
-              Discover fascinating Greek history in bite-sized stories. 
-              Get 2 curated stories daily to expand your knowledge of Greece's rich heritage.
+              {{ $t('hero.subtitle') }}
             </p>
             <div class="hero-features">
               <span class="hero-feature">
                 <i class="bi bi-calendar-day"></i>
-                2 Daily Stories
+                {{ $t('hero.features.daily') }}
               </span>
               <span class="hero-feature">
                 <i class="bi bi-phone"></i>
-                Mobile Friendly
+                {{ $t('hero.features.mobile') }}
               </span>
               <span class="hero-feature">
                 <i class="bi bi-clock"></i>
-                2-3 Min Reads
+                {{ $t('hero.features.readTime') }}
               </span>
             </div>
           </div>
@@ -40,22 +55,22 @@
                   <i class="bi bi-calendar-day"></i>
                 </div>
                 <div class="daily-content">
-                  <h2 class="daily-title">📚 Today's History Bites</h2>
-                  <p class="daily-subtitle">{{ getCurrentDateFormatted() }} • 2 stories to expand your knowledge</p>
+                  <h2 class="daily-title">📚 {{ $t('daily.title') }}</h2>
+                  <p class="daily-subtitle">{{ getCurrentDateFormatted() }} • {{ $t('daily.subtitle') }}</p>
                 </div>
               </div>
               
               <div class="row">
                 <div 
-                  v-for="story in dailyStories" 
+                  v-for="story in dailyStories.map(getTranslatedStory)" 
                   :key="story.id"
                   class="col-md-6"
                 >
                   <div class="daily-story-card">
                     <div class="daily-story-badge">
-                      <span>Daily Pick</span>
+                      <span>{{ $t('daily.badge') }}</span>
                     </div>
-                    <div class="daily-story-era">{{ story.era }}</div>
+                    <div class="daily-story-era">{{ $t(`eras.${story.era}`) }}</div>
                     <h4 class="daily-story-title">{{ story.title }}</h4>
                     <p class="daily-story-preview">{{ story.preview }}</p>
                     
@@ -65,7 +80,7 @@
                       <p class="daily-story-text">{{ story.content }}</p>
                       <div class="story-read-time">
                         <i class="bi bi-clock"></i>
-                        {{ story.readTime }} min read
+                        {{ story.readTime }} {{ $t('common.minRead') }}
                       </div>
                     </div>
                     
@@ -74,7 +89,7 @@
                       class="daily-read-btn"
                     >
                       <i class="bi bi-book"></i>
-                      {{ expandedStories.includes(story.id) ? 'Collapse Story' : 'Read Today\'s Bite' }}
+                      {{ expandedStories.includes(story.id) ? $t('daily.collapse') : $t('daily.readMore') }}
                     </button>
                   </div>
                 </div>
@@ -94,7 +109,7 @@
               v-model="searchQuery"
               type="text" 
               class="form-control search-input" 
-              placeholder="Search Greek history stories..."
+              :placeholder="$t('search.placeholder')"
             >
           </div>
         </div>
@@ -118,7 +133,7 @@
                 }]"
               >
                 <i v-if="era === 'Daily'" class="bi bi-star-fill me-1"></i>
-                {{ era }}
+                {{ $t(`filters.${era.toLowerCase()}`) }}
               </button>
             </div>
             
@@ -128,10 +143,10 @@
                 <div class="sort-controls">
                   <label class="sort-label">
                     <i class="bi bi-sort-down"></i>
-                    Sort by:
+                    {{ $t('controls.sortBy') }}:
                   </label>
                   <select v-model="sortBy" @change="currentPage = 1" class="form-select sort-select">
-                    <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+                    <option v-for="option in translatedSortOptions" :key="option.value" :value="option.value">
                       {{ option.label }}
                     </option>
                   </select>
@@ -143,18 +158,18 @@
                   <button 
                     @click="viewMode = 'pagination'; currentPage = 1"
                     :class="['btn', 'view-btn', { active: viewMode === 'pagination' }]"
-                    title="Pagination View"
+                    :title="$t('controls.paginationView')"
                   >
                     <i class="bi bi-grid-3x3-gap"></i>
-                    Pages
+                    {{ $t('controls.pages') }}
                   </button>
                   <button 
                     @click="viewMode = 'infinite'"
                     :class="['btn', 'view-btn', { active: viewMode === 'infinite' }]"
-                    title="Infinite Scroll"
+                    :title="$t('controls.infiniteScroll')"
                   >
                     <i class="bi bi-arrow-down-circle"></i>
-                    Scroll
+                    {{ $t('controls.scroll') }}
                   </button>
                 </div>
               </div>
@@ -163,7 +178,7 @@
                 <div class="results-info">
                   <span class="results-count">
                     <i class="bi bi-bookmarks"></i>
-                    {{ displayedStories.length }} of {{ totalFilteredStories }} stories
+                    {{ displayedStories.length }} {{ $t('controls.of') }} {{ totalFilteredStories }} {{ $t('controls.stories') }}
                   </span>
                 </div>
               </div>
@@ -184,24 +199,23 @@
             
             <div v-else-if="filteredStories.length === 0" class="empty-state">
               <i class="bi bi-search"></i>
-              <h3>No stories found</h3>
-              <p>Try adjusting your search or filter criteria</p>
+              <h3>{{ $t('stories.noResults') }}</h3>
+              <p>{{ $t('stories.adjustCriteria') }}</p>
             </div>
             
-            <div v-else class="row">
-              <div 
-                v-for="story in displayedStories" 
-                :key="story.id"
-                :data-story-id="story.id"
-                class="col-lg-6 col-xl-4"
-              >
+            <div v-else class="row">                <div 
+                  v-for="story in displayedStories.map(getTranslatedStory)" 
+                  :key="story.id"
+                  :data-story-id="story.id"
+                  class="col-lg-6 col-xl-4"
+                >
                 <div class="story-card fade-in">
                   <div v-if="isDailyStory(story.id)" class="daily-story-indicator">
                     <i class="bi bi-star-fill"></i>
-                    Today's Pick
+                    {{ $t('daily.todaysPick') }}
                   </div>
                   <div class="story-header">
-                    <span class="story-era">{{ story.era }}</span>
+                    <span class="story-era">{{ $t(`eras.${story.era}`) }}</span>
                     <h3 class="story-title">{{ story.title }}</h3>
                     <p class="story-preview">{{ story.preview }}</p>
                   </div>
@@ -213,30 +227,30 @@
                   <div class="story-footer">
                     <span class="read-time">
                       <i class="bi bi-clock"></i>
-                      {{ story.readTime }} min read
+                      {{ story.readTime }} {{ $t('common.minRead') }}
                     </span>
                     <button 
                       @click="toggleStory(story.id)"
                       class="expand-btn"
                     >
-                      <span>{{ expandedStories.includes(story.id) ? 'Read Less' : 'Read More' }}</span>
+                      <span>{{ expandedStories.includes(story.id) ? $t('stories.readLess') : $t('stories.readMore') }}</span>
                       <i :class="['bi', expandedStories.includes(story.id) ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
                     </button>
-                  </div>
+                    </div>
                 </div>
               </div>
             </div>
             
             <!-- Pagination Controls -->
             <div v-if="viewMode === 'pagination' && totalPages > 1" class="pagination-section">
-              <nav aria-label="Stories pagination">
+              <nav :aria-label="$t('pagination.label')">
                 <ul class="pagination-controls">
                   <li>
                     <button 
                       @click="goToPage(1)"
                       :disabled="currentPage === 1"
                       class="pagination-btn"
-                      title="First Page"
+                      :title="$t('pagination.first')"
                     >
                       <i class="bi bi-chevron-double-left"></i>
                     </button>
@@ -246,7 +260,7 @@
                       @click="goToPage(currentPage - 1)"
                       :disabled="currentPage === 1"
                       class="pagination-btn"
-                      title="Previous Page"
+                      :title="$t('pagination.previous')"
                     >
                       <i class="bi bi-chevron-left"></i>
                     </button>
@@ -268,7 +282,7 @@
                       @click="goToPage(currentPage + 1)"
                       :disabled="currentPage === totalPages"
                       class="pagination-btn"
-                      title="Next Page"
+                      :title="$t('pagination.next')"
                     >
                       <i class="bi bi-chevron-right"></i>
                     </button>
@@ -278,7 +292,7 @@
                       @click="goToPage(totalPages)"
                       :disabled="currentPage === totalPages"
                       class="pagination-btn"
-                      title="Last Page"
+                      :title="$t('pagination.last')"
                     >
                       <i class="bi bi-chevron-double-right"></i>
                     </button>
@@ -287,7 +301,7 @@
               </nav>
               
               <div class="pagination-info">
-                Page {{ currentPage }} of {{ totalPages }}
+                {{ $t('pagination.page') }} {{ currentPage }} {{ $t('pagination.of') }} {{ totalPages }}
               </div>
             </div>
             
@@ -300,11 +314,11 @@
               >
                 <div v-if="loadingMore" class="loading-spinner">
                   <div class="spinner-mini"></div>
-                  Loading more stories...
+                  {{ $t('controls.loadingMore') }}
                 </div>
                 <div v-else class="load-more-content">
                   <i class="bi bi-plus-circle"></i>
-                  Load {{ Math.min(storiesPerPage, totalFilteredStories - displayedStories.length) }} More Stories
+                  {{ $t('controls.loadMore', { count: Math.min(storiesPerPage, totalFilteredStories - displayedStories.length) }) }}
                 </div>
               </button>
             </div>
@@ -320,9 +334,9 @@
           <div class="col-12 text-center">
             <p class="mb-0">
               <i class="bi bi-heart-fill text-danger"></i>
-              Made with love for Greek history enthusiasts
+              {{ $t('footer.madeWith') }}
             </p>
-            <small class="text-muted">© 2025 Mini Greek History Bites</small>
+            <small class="text-muted">{{ $t('footer.copyright') }}</small>
           </div>
         </div>
       </div>
@@ -332,10 +346,13 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'App',
   setup() {
+    const { t, locale } = useI18n()
+    
     const loading = ref(true)
     const searchQuery = ref('')
     const activeFilter = ref('All')
@@ -348,13 +365,21 @@ export default {
     const loadingMore = ref(false)
     
     const eras = ['All', 'Daily', 'Ancient', 'Byzantine', 'Ottoman', 'Modern', 'Obscure']
-    const sortOptions = [
-      { value: 'default', label: 'Default Order' },
-      { value: 'title', label: 'Title A-Z' },
-      { value: 'era', label: 'Era' },
-      { value: 'readTime', label: 'Read Time' },
-      { value: 'newest', label: 'Newest First' }
-    ]
+    
+    const currentLocale = computed(() => locale.value)
+    
+    const switchLanguage = (lang) => {
+      locale.value = lang
+      localStorage.setItem('preferred-language', lang)
+    }
+    
+    const translatedSortOptions = computed(() => [
+      { value: 'default', label: t('sort.default') },
+      { value: 'title', label: t('sort.title') },
+      { value: 'era', label: t('sort.era') },
+      { value: 'readTime', label: t('sort.readTime') },
+      { value: 'newest', label: t('sort.newest') }
+    ])
     
     const stories = ref([
       {
@@ -478,6 +503,125 @@ export default {
         readTime: 3
       }
     ])
+    
+    // Story translations helper
+    const getTranslatedStory = (story) => {
+      const storyTranslations = {
+        1: {
+          el: {
+            title: "Γιατί τα Ελληνικά Ταξί είναι Κίτρινα;",
+            preview: "Ο εκπληκτικός λόγος πίσω από τον χαρακτηριστικό κίτρινο στόλο ταξί της Ελλάδας χρονολογείται από μια πρακτική απόφαση στη δεκαετία του 1980...",
+            content: "Το 1980, η ελληνική κυβέρνηση διέταξε όλα τα ταξί στην Αθήνα να βαφτούν κίτρινα για έναν πολύ πρακτικό λόγο: ορατότητα και ασφάλεια. Το φωτεινό κίτρινο χρώμα επιλέχθηκε επειδή αναγνωρίζεται εύκολα τόσο μέρα όσο και νύχτα, κάνοντας πιο ασφαλή για τους επιβάτες να αναγνωρίσουν νόμιμα ταξί. Αυτή η απόφαση ήρθε μετά από μια περίοδο όπου τα ταξί είχαν διάφορα χρώματα, προκαλώντας σύγχυση και κάποιες ανησυχίες για την ασφάλεια. Το κίτρινο χρώμα έγινε επίσης σύμβολο του αστικού τοπίου της Αθήνας, δημιουργώντας μια ενιαία οπτική ταυτότητα για το σύστημα μεταφοράς της πόλης."
+          }
+        },
+        2: {
+          el: {
+            title: "Ποιος ήταν ο Θεόδωρος Κολοκοτρώνης;",
+            preview: "Ο θρυλικός στρατηγός που έγινε γνωστός ως ο 'Γέρος του Μοριά' κατά τη διάρκεια του Ελληνικού Αγώνα Ανεξαρτησίας...",
+            content: "Ο Θεόδωρος Κολοκοτρώνης (1770-1843) ήταν αναμφισβήτητα ο σημαντικότερος στρατιωτικός ηγέτης του Ελληνικού Αγώνα Ανεξαρτησίας. Γεννήθηκε στο Ραμαβούνι της Μεσσηνίας και έγινε γνωστός ως 'Ο Γέρος του Μοριά'. Οι τακτικές του ανταρτοπολέμου κατά της Οθωμανικής Αυτοκρατορίας ήταν επαναστατικές για την εποχή τους. Ο Κολοκοτρώνης είχε περάσει χρόνια πολεμώντας μαζί με τους Βρετανούς στα Ιόνια Νησιά, αποκτώντας πολύτιμη στρατιωτική εμπειρία. Όταν άρχισε η Ελληνική Επανάσταση το 1821, επέστρεψε για να ηγηθεί του αγώνα στην Πελοπόννησο."
+          }
+        },
+        3: {
+          el: {
+            title: "Το Μυστήριο του Μηχανισμού των Αντικυθήρων",
+            preview: "Ανακαλυφθέν σε ναυάγιο, αυτή η αρχαία ελληνική συσκευή έχει χαρακτηριστεί ως ο πρώτος υπολογιστής του κόσμου...",
+            content: "Ο Μηχανισμός των Αντικυθήρων, που χρονολογείται περίπου από το 100-50 π.Χ., είναι ίσως το πιο μυστηριώδες αντικείμενο της αρχαίας Ελλάδας. Ανακαλύφθηκε το 1901 από σφουγγαράδες κοντά στο ελληνικό νησί Αντικύθηρα, αυτή η χάλκινη συσκευή μπέρδεψε τους ερευνητές για δεκαετίες. Περιέχει τουλάχιστον 37 συμπλεκόμενους χάλκινους γρανάζια και χρησιμοποιούνταν για την πρόβλεψη αστρονομικών θέσεων και εκλείψεων για ημερολογιακούς και αστρολογικούς σκοπούς."
+          }
+        },
+        4: {
+          el: {
+            title: "Ο Τελευταίος Αυτοκράτορας του Βυζαντίου",
+            preview: "Ο Κωνσταντίνος ΙΑ' Παλαιολόγος πέθανε υπερασπιζόμενος την Κωνσταντινούπολη το 1453, σηματοδοτώντας το τέλος μιας χιλιετούς αυτοκρατορίας...",
+            content: "Ο Κωνσταντίνος ΙΑ' Παλαιολόγος (1405-1453) ήταν ο τελευταίος Βυζαντινός Αυτοκράτορας, κυβερνώντας από το 1449 μέχρι τον θάνατό του κατά την άλωση της Κωνσταντινούπολης το 1453. Όταν οι οθωμανικές δυνάμεις του Μεχμέτ Β' πολιόρκησαν την πόλη, ο Κωνσταντίνος έδειξε αξιοσημείωτο θάρρος, επιλέγοντας να πολεμήσει μαζί με τους στρατιώτες του αντί να διαφύγει."
+          }
+        },
+        5: {
+          el: {
+            title: "Η Μυστική Γλώσσα της Τσακωνικής",
+            preview: "Κρυμμένη στα βουνά της Πελοποννήσου, μια μοναδική ελληνική διάλεκτος διατηρεί γλωσσικούς θησαυρούς από αρχαίους χρόνους...",
+            content: "Η Τσακωνική είναι μια μοναδική ελληνική διάλεκτος που ομιλείται σε τμήματα της ανατολικής Πελοποννήσου και έχει συναρπάσει τους γλωσσολόγους για αιώνες. Σε αντίθεση με άλλες ελληνικές διαλέκτους που εξελίχθηκαν από την Κοινή Ελληνική, η Τσακωνική πιστεύεται ότι κατάγεται απευθείας από την αρχαία Δωρική Ελληνική."
+          }
+        },
+        6: {
+          el: {
+            title: "Το Θαύμα του Ελληνικού Πυρός",
+            preview: "Το μυστικό όπλο που έσωσε την Κωνσταντινούπολη από τις αραβικές πολιορκίες παραμένει ένα από τα μεγαλύτερα μυστήρια της ιστορίας...",
+            content: "Το Ελληνικό Πυρ ήταν το μυστικό όπλο της Βυζαντινής Αυτοκρατορίας, ένα υγρό εμπρηστικό που μπορούσε να καίει πάνω στο νερό και ήταν σχεδόν αδύνατο να σβήσει. Εφευρέθηκε γύρω στο 670 μ.Χ. από τον Καλλίνικο της Ηλιουπόλεως και χρησιμοποιήθηκε για πρώτη φορά για να σπάσει την αραβική πολιορκία της Κωνσταντινούπολης το 678 μ.Χ."
+          }
+        },
+        7: {
+          el: {
+            title: "Ο Χορός του Θανάτου: Ο Καραγκιόζης κατά την Οθωμανική Κυριαρχία",
+            preview: "Πώς μια μαριονέτα σκιών έγινε σύμβολο ελληνικής αντίστασης και χιούμορ κατά την οθωμανική κατοχή...",
+            content: "Ο Καραγκιόζης, ο αγαπημένος χαρακτήρας του θεάτρου σκιών, εμφανίστηκε κατά την οθωμανική κυριαρχία ως κάτι περισσότερο από απλή διασκέδαση – έγινε φωνή της ελληνικής αντίστασης. Δημιουργήθηκε τον 19ο αιώνα, ο Καραγκιόζης αντιπροσώπευε τον κοινό Έλληνα κάτω από την οθωμανική κυριαρχία: φτωχός, έξυπνος και πάντα προσπαθούσε να ξεγελάσει την εξουσία."
+          }
+        },
+        8: {
+          el: {
+            title: "Η Τελευταία Προφητεία του Μαντείου",
+            preview: "Όταν ο Αυτοκράτορας Ιουλιανός προσπάθησε να αναβιώσει το Μαντείο των Δελφών, έλαβε μια προφητεία που σηματοδότησε το τέλος μιας εποχής...",
+            content: "Το 362 μ.Χ., ο Αυτοκράτορας Ιουλιανός ο Παραβάτης, προσπαθώντας να αποκαταστήσει τον παγανισμό στη Ρωμαϊκή Αυτοκρατορία, έστειλε τον γιατρό του Οριβάσιο να συμβουλευτεί το Μαντείο των Δελφών, που είχε σιωπήσει για δεκαετίες κάτω από τη χριστιανική κυριαρχία."
+          }
+        },
+        9: {
+          el: {
+            title: "Ο Μανδύας του Φιλοσόφου: Η Απλή Ζωή του Σωκράτη",
+            preview: "Γιατί ο μεγαλύτερος φιλόσοφος της Αθήνας επέλεξε να φοράει τον ίδιο απλό μανδύα όλο το χρόνο...",
+            content: "Ο Σωκράτης, ο πατέρας της δυτικής φιλοσοφίας, ήταν διάσημος όχι μόνο για τη σοφία του αλλά και για τον εσκεμμένα απλό τρόπο ζωής του. Φορούσε τον ίδιο τραχύ μάλλινο μανδύα (ιμάτιο) όλο το χρόνο, ανεξάρτητα από τον καιρό. Αυτό δεν ήταν φτώχεια αλλά φιλοσοφική επιλογή."
+          }
+        },
+        10: {
+          el: {
+            title: "Το Θαύμα του Σύγχρονου Ελληνικού Καφέ",
+            preview: "Πώς ο ελληνικός καφές έγινε πολιτιστική κληρονομιά της UNESCO και ένα καθημερινό τελετουργικό που ενώνει τους ανθρώπους...",
+            content: "Ο ελληνικός καφές, γνωστός ως 'ελληνικός καφές', είναι πολύ περισσότερο από ένα ρόφημα—είναι μια πολιτιστική κληρονομιά αναγνωρισμένη από την UNESCO που ενσωματώνει τον ελληνικό τρόπο ζωής. Το τελετουργικό της προετοιμασίας είναι σχεδόν τελετουργικό: λεπτοαλεσμένος καφές βράζεται αργά σε ένα ειδικό δοχείο που ονομάζεται 'μπρίκι' με ζάχαρη και νερό."
+          }
+        },
+        11: {
+          el: {
+            title: "Ο Μυστικός Κώδικας του Αγίου Όρους",
+            preview: "Το αυτόνομο μοναστικό κράτος που έχει απαγορεύσει τις γυναίκες για πάνω από 1.000 χρόνια και διατηρεί το δικό του σύστημα χρόνου...",
+            content: "Το Άγιον Όρος, γνωστό και ως 'Άγιον Βουνό', είναι ένα μοναδικό αυτόνομο μοναστικό κράτος στη βόρεια Ελλάδα που λειτουργεί κάτω από τους δικούς του νόμους για πάνω από 1.000 χρόνια. Αυτό που το κάνει πραγματικά εξαιρετικό είναι η πλήρης απαγόρευσή του στις γυναίκες."
+          }
+        },
+        12: {
+          el: {
+            title: "Το Ρεμπέτικο της Υπόγειας Ζωής",
+            preview: "Πώς το 'ελληνικό μπλουζ' αναδύθηκε από τα χασισοκαπνεία και έγινε η ψυχή ενός έθνους...",
+            content: "Το ρεμπέτικο, που συχνά ονομάζεται 'ελληνικό μπλουζ', αναδύθηκε στις αρχές του 20ού αιώνα από τα υπόγεια χασισοκαπνεία (τεκέδες) της Αθήνας και του Πειραιά. Γεννήθηκε από τον πόνο των προσφύγων που έφυγαν από τη Μικρά Ασία μετά το 1922."
+          }
+        },
+        13: {
+          el: {
+            title: "Το Μυστήριο της Γραμμικής Β'",
+            preview: "Η αρχαία γραφή που παρέμεινε αδιάλυτη για 3.000 χρόνια μέχρι που ένας νεαρός Βρετανός αρχιτέκτονας άλλαξε τα πάντα...",
+            content: "Η Γραμμική Β' ήταν ένα από τα μεγαλύτερα αινίγματα της αρχαιολογίας—μια αρχαία γραφή που βρέθηκε σε πήλινες πλάκες σε όλη την Ελλάδα της Εποχής του Χαλκού και κανείς δεν μπορούσε να διαβάσει για πάνω από 50 χρόνια μετά την ανακάλυψή της."
+          }
+        },
+        14: {
+          el: {
+            title: "Η Επιδημία του Χορού στη Μονεμβασιά",
+            preview: "Όταν μια ολόκληρη μεσαιωνική πόλη δεν μπορούσε να σταματήσει να χορεύει, και πώς τσιμπήματα αραχνών μπορεί να προκάλεσαν μαζική υστερία...",
+            content: "Στη μεσαιωνική οχυρωμένη πόλη της Μονεμβασιάς, εμφανίστηκε ένα παράξενο φαινόμενο που μπέρδεψε γιατρούς και κληρικούς: η 'επιδημία του χορού'. Οι πολίτες ξεκινούσαν ξαφνικά να χορεύουν ακατάσχετα, αδυνατώντας να σταματήσουν για ώρες ή ακόμη και ημέρες."
+          }
+        },
+        15: {
+          el: {
+            title: "Η Γλώσσα των Σαρακατσάνων",
+            preview: "Οι νομάδες βοσκοί που διατήρησαν αρχαίες ελληνικές λέξεις περιπλανώμενοι στα βουνά για αιώνες...",
+            content: "Οι Σαρακατσάνοι ήταν νομάδες βοσκοί που περιπλανιόνταν στα βουνά της Ελλάδας για πάνω από 500 χρόνια, ζώντας σε προσωρινές καλύβες και ακολουθώντας αρχαίες μεταναστευτικές διαδρομές με τα κοπάδια τους. Αυτό που τους κάνει εξαιρετικούς είναι η γλώσσα τους—μια διάλεκτος που διατήρησε αρχαίες ελληνικές λέξεις και εκφράσεις που είχαν εξαφανιστεί παντού αλλού."
+          }
+        }
+      }
+      
+      if (currentLocale.value === 'el' && storyTranslations[story.id]?.el) {
+        return {
+          ...story,
+          ...storyTranslations[story.id].el
+        }
+      }
+      return story
+    }
     
     const filteredStories = computed(() => {
       let filtered = stories.value
@@ -607,7 +751,8 @@ export default {
     
     const getCurrentDateFormatted = () => {
       const today = new Date()
-      return today.toLocaleDateString('en-US', { 
+      const localeCode = currentLocale.value === 'el' ? 'el-GR' : 'en-US'
+      return today.toLocaleDateString(localeCode, { 
         weekday: 'long', 
         year: 'numeric', 
         month: 'long', 
@@ -663,6 +808,12 @@ export default {
     }
     
     onMounted(() => {
+      // Load preferred language from localStorage
+      const savedLanguage = localStorage.getItem('preferred-language')
+      if (savedLanguage && ['en', 'el'].includes(savedLanguage)) {
+        locale.value = savedLanguage
+      }
+      
       // Set daily stories
       dailyStories.value = getDailyStories()
       
@@ -684,7 +835,7 @@ export default {
       viewMode,
       loadingMore,
       eras,
-      sortOptions,
+      translatedSortOptions,
       stories,
       filteredStories,
       sortedStories,
@@ -697,7 +848,10 @@ export default {
       getCurrentDateFormatted,
       isDailyStory,
       goToPage,
-      loadMoreStories
+      loadMoreStories,
+      currentLocale,
+      switchLanguage,
+      getTranslatedStory
     }
   }
 }

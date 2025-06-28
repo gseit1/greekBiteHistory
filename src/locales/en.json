@@ -1,0 +1,78 @@
+{
+  "hero": {
+    "title": "Mini Greek History Bites",
+    "subtitle": "Discover fascinating Greek history in bite-sized stories. Get 2 curated stories daily to expand your knowledge of Greece's rich heritage.",
+    "features": {
+      "daily": "2 Daily Stories",
+      "mobile": "Mobile Friendly",
+      "readTime": "2-3 Min Reads"
+    }
+  },
+  "daily": {
+    "title": "Today's History Bites",
+    "subtitle": "2 stories to expand your knowledge",
+    "badge": "Daily Pick",
+    "readMore": "Read Today's Bite",
+    "collapse": "Collapse Story",
+    "todaysPick": "Today's Pick"
+  },
+  "search": {
+    "placeholder": "Search Greek history stories..."
+  },
+  "filters": {
+    "all": "All",
+    "daily": "Daily",
+    "ancient": "Ancient",
+    "byzantine": "Byzantine",
+    "ottoman": "Ottoman",
+    "modern": "Modern",
+    "obscure": "Obscure"
+  },
+  "controls": {
+    "sortBy": "Sort by",
+    "pages": "Pages",
+    "scroll": "Scroll",
+    "paginationView": "Pagination View",
+    "infiniteScroll": "Infinite Scroll",
+    "of": "of",
+    "stories": "stories",
+    "loadMore": "Load {count} More Stories",
+    "loadingMore": "Loading more stories..."
+  },
+  "sort": {
+    "default": "Default Order",
+    "title": "Title A-Z",
+    "era": "Era",
+    "readTime": "Read Time",
+    "newest": "Newest First"
+  },
+  "stories": {
+    "readMore": "Read More",
+    "readLess": "Read Less",
+    "noResults": "No stories found",
+    "adjustCriteria": "Try adjusting your search or filter criteria"
+  },
+  "pagination": {
+    "label": "Stories pagination",
+    "first": "First Page",
+    "previous": "Previous Page",
+    "next": "Next Page",
+    "last": "Last Page",
+    "page": "Page",
+    "of": "of"
+  },
+  "common": {
+    "minRead": "min read"
+  },
+  "footer": {
+    "madeWith": "Made with love for Greek history enthusiasts",
+    "copyright": "© 2025 Mini Greek History Bites"
+  },
+  "eras": {
+    "Ancient": "Ancient",
+    "Byzantine": "Byzantine", 
+    "Ottoman": "Ottoman",
+    "Modern": "Modern",
+    "Obscure": "Obscure"
+  }
+}
